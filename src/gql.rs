@@ -9,6 +9,7 @@ use graphql_ws_client::{AsyncWebsocketClient, GraphQLClientClientBuilder, Subscr
 
 pub async fn build_gql_client<T: GraphQLQuery + Send + Sync + Unpin + 'static>(
 	variables: T::Variables,
+	api_key: String,
 ) -> Result<(
 	AsyncWebsocketClient<GraphQLClient, Message>,
 	SubscriptionStream<GraphQLClient, StreamingOperation<T>>,
@@ -25,10 +26,8 @@ where
 		"Sec-Websocket-Protocol",
 		HeaderValue::from_str("graphql-transport-ws").unwrap(),
 	);
-	req.headers_mut().insert(
-		"Authorization",
-		HeaderValue::from_str("Bearer Your API Key here").unwrap(),
-	);
+	req.headers_mut()
+		.insert("Authorization", HeaderValue::from_str(&api_key).unwrap());
 
 	let (ws_stream, _) = connect_async(req)
 		.await
